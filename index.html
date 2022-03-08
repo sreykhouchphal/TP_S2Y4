@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book shop CRUD</title>
+</head>
+<style>
+    body {
+        background-color: #aaa;
+        }
+    #container{
+        display: flex;
+        justify-content: center;
+    }
+    #box1{
+        background-color:rgb(226, 217, 82);
+        height: 40rem;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        margin:1%; 
+        max-width: 300px;
+        border-radius:10px; 
+    }
+    .header{
+        margin: 20px;
+        font-size: 3rem;
+    }
+    #box2{
+        background-color:rgb(218, 218, 218);
+        margin:1%;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        border-radius:10px; 
+        max-width: 1100px;
+        position: relative;
+    }
+    #add_btn{
+        margin: 20px;
+        width:100px;
+        height: 40px;
+        border-radius: 5px;
+    }
+    #caption{
+        position: absolute;
+        bottom: 0px;
+        left:8px;
+    }
+    #image{
+        position: absolute;
+        width: 120px;
+        height: 100px;
+        bottom: 130px;
+        left: 33px;
+    }
+    #name, #category , #price{
+         margin: 10px;
+         width: 200px;
+         height:30px;
+         border-radius: 5px;
+    }
+    #text{
+        font-size:20px;
+    }
+    #header{
+        background-color: rgb(141, 123, 42);
+        height: 60px;
+        width: 100%;
+        margin-top:0px;
+        padding-top:13px;
+        border-bottom: 2px solid;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+        position: absolute;
+    }
+    .book_container{
+        width: 230px;
+        margin: 20px;
+        margin-top: 20px;
+        height: 300px;
+        border:2px solid;
+        border-radius: 10px;
+        box-shadow: rgba(17, 17, 26, 0.2) 0px 4px 16px, rgba(17, 17, 26, 0.1) 0px 8px 24px, rgba(17, 17, 26, 0.1) 0px 16px 56px;
+        border-color: rgb(46, 39, 39);
+        position: relative;
+    }
+    .btn-edit{
+        padding: 10px;
+        padding-left: 25px;
+        padding-right: 25px;
+        margin:10px;
+        background-color:rgb(202, 166, 166);
+        border-radius: 5px;
+        bottom: 10px;
+        position:absolute;
+        right:120px
+    }
+    .btn-delete{
+        padding: 10px;
+        padding-left: 25px;
+        padding-right: 25px;
+        margin:10px;
+        background-color:rgb(206, 166, 166);
+        border-radius: 5px;
+        bottom: 10px;
+        position:absolute;
+        right:10px
+    }
+    .image{
+        width:120px;
+        height:110px;
+        position: absolute;
+        right: 53px;
+        top: 25px;
+    }
+    .caption_box{
+        padding: 10px;
+        font-size: 17px;
+        position: absolute;
+        bottom: 90px;
+        margin-left: 19px;
+        font-family: 'Courier New', Courier, monospace;
+    }
+    .detail{
+        margin-top:10px;
+        margin-left:190px;
+       background-color:rgb(162, 143, 180);
+    }
+</style>
+<body>
+<div id="container">
+    <div id="box1">
+       <center>
+       <h1 class="header">Book Information</h1>
+       <form autocomplete="off" onsubmit="onFormSubmit()">
+       <br>
+       <p id="text">Name</p>
+       <input type="text" name="name1" id="name">
+       <p id="text">Catagory</p>
+       <input type="text" name="category1" id="category">
+       <p id="text">Price</p>
+       <input type="number" name="price1" id="price">
+       <p></p>
+       <button type="summit" name="add" id="add_btn" onclick="addBook()">Add</button>
+       </form>
+        </center>
+    </div>
+    <div id="box2">
+    </div>  
+</div>
+<script>
+    let selectedRow = null;
+    let books = [{}];
+    const Book = localStorage.getItem('books');
+    const dataBook = JSON.parse(Book);
+    
+    for (datab in dataBook) {
+                document.getElementById("box2").innerHTML +=
+                    `
+                    <div class="book_container">
+                    <div class="detail"><a href="http://localhost:3000/detail">detail</a></div>
+                    <img class="image" src="./assets/book.png"  alt="#">
+                    <div class="caption_box">Name : ${dataBook[datab].name}
+                   <br>Category : ${dataBook[datab].category}
+                   <br>Price : ${dataBook[datab].price}</div>
+                    <div class="btn-edit" id="${parseInt(datab)}"  onclick="editBook(this.id)">Edit</div>
+                    <div class="btn-delete"  id="${parseInt(datab)}" onclick="deleteBook(this.id)">Delete</div>
+                    </div>`;
+            }
+            function addBook(){
+                var formData = readFormData();
+                if (selectedRow === null) {
+                    insertNewRecord(formData);
+                } else {
+                    updateRecord(formData);
+                }
+                resetForm();
+            }
+
+            function readFormData() {
+                var formData = {};
+                formData["name"] = document.getElementById("name").value;
+                formData["category"] = document.getElementById("category").value;
+                formData["price"] = document.getElementById("price").value;
+
+                return formData;
+            }
+
+            function insertNewRecord(data) {
+                const Book = localStorage.getItem('books');
+                const dataBook2 = JSON.parse(Book);
+                books = Object.assign([{}], dataBook2);
+                let x;
+                if (dataBook2 == null) {
+                    x = 0
+                } else {
+                    x = dataBook2.length;
+                }
+                const book = {
+                    name: `${data.name}`,
+                    category: `${data.category}`, 
+                    price: `${data.price}`
+                };
+                books[x] = book;
+                localStorage.setItem('books', JSON.stringify(books));
+                let databooks = getbooks();
+               
+                document.getElementById("box2").innerHTML +=
+                   `<div class="book_container">
+                    <div class="detail"><a href="http://localhost:3000/detail">detail</a></div>
+                    <img class="image" src="./assets/book.png alt="#">
+                   <div class="caption_box">Name : ${data.name}
+                   <br>Category : ${data.category}
+                   <br>Price : ${data.price}</div>
+                    <div class="btn-edit" id="${parseInt(x+1)}"  onclick="editBook(this.id)">Edit</div>
+                    <div class="btn-delete" id="${parseInt(x+1)}"  onclick="deleteBook(this.id)">Delete</div></div>`;
+            }
+            let header = document.getElementsByClassName("header");
+            function editBook(id){
+                header.innerHTML = "Edit information here!";
+
+                let getdatabooks = getbooks();
+                selectedRow = id;
+                document.getElementById('name').value = getdatabooks[id].name;
+                document.getElementById('category').value = getdatabooks[id].category;
+                document.getElementById('price').value = getdatabooks[id].price;
+            }
+            function updateRecord(formData) {
+                document.getElementsByClassName("box2")[selectedRow].innerHTML =  
+                    `<div class="caption_box">Name : ${formData.name}
+                    <br>Category : ${formData.category}<br>Price : ${formData.price}</div>`;
+                
+                header.innerHTML = "Book information!";
+
+                //get books from localstorage
+                let bookss = getbooks();
+                const bookUpdate = {
+                    name: `${formData.name}`,
+                    category: `${formData.category}`,
+                    price: `${formData.price}`
+                };
+
+                //merge bookss to books
+                books = Object.assign([{}], bookss);
+                books[selectedRow] = bookUpdate;
+                localStorage.setItem('books', JSON.stringify(books));
+
+                let header = document.getElementsByClassName("header");
+                header.innerHTML = "Edit information here!";
+                selectedRow = null;
+            }
+             //delete
+             function deleteBook(id) {
+                //get books from localstorage
+                let databooks = getbooks();
+                if (confirm('Do you want to delete this record?')) {
+                    //remove books at id and count 1
+                    databooks.splice(id, 1);
+                    localStorage.setItem('books', JSON.stringify(databooks));
+
+                    //reset home to update id element
+                    document.getElementById("box2").innerHTML = '';
+                    
+                    for (databook in databooks) {
+                        document.getElementById("box2").innerHTML +=
+                        `<div class="book_container">
+                            <div class="detail"><a href="http://localhost:3000/detail">detail</a></div>
+                        <img class="image" src="./assets/book.png" alt="#">
+                        <div class="caption_box">Name : ${databooks[databook].name}
+                       <br>Category : ${databooks[databook].category}
+                       <br>Price : ${databooks[databook].price}  </div>
+                        <div class="btn-edit" id="${parseInt(databook)}"  onclick="editBook(this.id)">Edit</div>
+                        <div class="btn-delete" id="${parseInt(databook)}"  onclick="deleteBook(this.id)">Delete</div></div>`;
+                           
+                    }
+                }
+                resetForm();
+            }
+
+            function resetForm() {
+                document.getElementById('name').value = '';
+                document.getElementById('category').value = '';
+                document.getElementById('price').value = '';
+            }
+
+            function getbooks() {
+                const getbooks = localStorage.getItem('books');
+                let databooks = JSON.parse(getbooks);
+
+                return databooks;
+            }
+</script>
+</body>
+</html>
